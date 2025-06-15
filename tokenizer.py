@@ -3,16 +3,22 @@ import re
 token_specification = [
     ('FN', r'fn'),
     ('LET', r'let'),
+    ('IF', r'if'),
+    ('THEN', r'then'),
+    ('ELSE', r'else'),
     ('COLON2', r'::'),
     ('ARROW2', r'->>'),
     ('ARROW', r'->'),
+    ('EQEQ', r'=='),  # Added before EQUAL to ensure == is tokenized correctly
     ('EQUAL', r'='),
     ('PLUS', r'\+'),
     ('MINUS', r'-'),
     ('MULTIPLY', r'\*'),
     ('DIVIDE', r'/'),
+    ('COLON', r':'),
     ('PUTS', r'puts'),
     ('INT_TYPE', r'Int'),
+    ('STRING_TYPE', r'String'),  # Added to support String type
     ('NUMBER', r'\d+'),
     ('IDENT', r'[a-zA-Z_][a-zA-Z0-9_]*'),
     ('STRING', r'"[^"]*"'),
@@ -25,7 +31,6 @@ tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
 get_token = re.compile(tok_regex).match
 
 def tokenize(code):
-    # Handle comments: remove everything after '--'
     lines = []
     for line in code.splitlines():
         if '--' in line:

@@ -16,6 +16,14 @@ let a = 10
 let b :: Int = 20
 let c = a + b
 
+-- If else
+let test :: String = "test"
+
+if test == "test" then:
+    puts "This works"
+else
+    puts "This isn't working"
+
 -- Output test
 puts "Hello, Belasova!"
 puts c
@@ -25,3 +33,9 @@ puts add 10 5
 puts sub 10 5
 puts multi 10 5
 puts div 10 5
+-- Testing Adding variables into a variable with an output
+let a :: Int = 100
+let b :: Int = 300
+
+let xyz = a + b
+puts xyz

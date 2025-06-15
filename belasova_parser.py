@@ -21,29 +21,24 @@ class Parser:
         ast = []
         while self.current()[0] != 'EOF':
             if self.current()[0] == 'FN':
-                ast.append(self.parse_function_signature())
+                ast.extend(self.parse_function())
             elif self.current()[0] == 'LET':
                 ast.append(self.parse_variable_assignment())
             elif self.current()[0] == 'PUTS':
                 ast.append(self.parse_puts())
-            elif self.current()[0] == 'IDENT':
-                ast.append(self.parse_function_definition())
+            elif self.current()[0] == 'IF':
+                ast.append(self.parse_if_else())
             else:
                 raise RuntimeError(f"Unexpected token: {self.current()}")
         return ast
 
-    def parse_function_signature(self):
+    def parse_function(self):
         self.eat('FN')
         name = self.eat('IDENT')[1]
         self.eat('COLON2')
         param_types = []
-        while True:
-            tok = self.current()
-            if tok[0] == 'INT_TYPE':
-                param_types.append(tok[1])
-                self.eat('INT_TYPE')
-            else:
-                raise RuntimeError(f"Expected type, got {tok}")
+        while self.current()[0] in ('INT_TYPE', 'STRING_TYPE'):
+            param_types.append(self.eat(self.current()[0])[1])
             if self.current()[0] == 'ARROW':
                 self.eat('ARROW')
             elif self.current()[0] == 'ARROW2':
@@ -51,17 +46,18 @@ class Parser:
                 break
             else:
                 raise RuntimeError(f"Expected arrow, got {self.current()}")
-        return_type = self.eat('INT_TYPE')[1]
-        return FunctionSignature(name, param_types, return_type)
-
-    def parse_function_definition(self):
-        name = self.eat('IDENT')[1]
+        return_type = self.eat(self.current()[0])[1]  # Support both Int and String
+        signature = FunctionSignature(name, param_types, return_type)
+        
+        # Parse function definition, excluding the function name from params
+        self.eat('IDENT')  # Skip the function name (e.g., 'add')
         params = []
         while self.current()[0] == 'IDENT':
             params.append(self.eat('IDENT')[1])
         self.eat('EQUAL')
         body = self.parse_expression()
-        return FunctionDefinition(name, params, body)
+        definition = FunctionDefinition(name, params, body)
+        return [signature, definition]
 
     def parse_variable_assignment(self):
         self.eat('LET')
@@ -69,7 +65,10 @@ class Parser:
         type_annotation = None
         if self.current()[0] == 'COLON2':
             self.eat('COLON2')
-            type_annotation = self.eat('INT_TYPE')[1]
+            if self.current()[0] in ('INT_TYPE', 'STRING_TYPE'):
+                type_annotation = self.eat(self.current()[0])[1]
+            else:
+                raise RuntimeError(f"Expected type, got {self.current()}")
         self.eat('EQUAL')
         value = self.parse_expression()
         return VariableAssignment(name, type_annotation, value)
@@ -79,9 +78,29 @@ class Parser:
         expr = self.parse_expression()
         return PutsStatement(expr)
 
+    def parse_if_else(self):
+        self.eat('IF')
+        condition = self.parse_expression()
+        self.eat('THEN')
+        self.eat('COLON')
+        then_block = []
+        while self.current()[0] not in ('ELSE', 'EOF'):
+            if self.current()[0] == 'PUTS':
+                then_block.append(self.parse_puts())
+            else:
+                raise RuntimeError(f"Unexpected token in then block: {self.current()}")
+        else_block = []
+        if self.current()[0] == 'ELSE':
+            self.eat('ELSE')
+            if self.current()[0] == 'PUTS':  # Only parse one PUTS statement for else block
+                else_block.append(self.parse_puts())
+            else:
+                raise RuntimeError(f"Expected PUTS in else block, got {self.current()}")
+        return IfElseStatement(condition, then_block, else_block)
+
     def parse_expression(self):
         left = self.parse_term()
-        while self.current()[0] in ('PLUS', 'MINUS'):
+        while self.current()[0] in ('PLUS', 'MINUS', 'EQEQ'):
             op = self.eat(self.current()[0])[1]
             right = self.parse_term()
             left = BinaryOp(left, op, right)

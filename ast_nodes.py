@@ -23,6 +23,15 @@ class PutsStatement:
     def __repr__(self):
         return f"Puts({self.expr})"
 
+class IfElseStatement:
+    def __init__(self, condition, then_block, else_block):
+        self.condition = condition
+        self.then_block = then_block
+        self.else_block = else_block
+
+    def __repr__(self):
+        return f"IfElse({self.condition}, then={self.then_block}, else={self.else_block})"
+
 class BinaryOp:
     def __init__(self, left, op, right):
         self.left = left

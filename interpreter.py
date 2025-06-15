@@ -12,7 +12,11 @@ class Interpreter:
 
     def interpret(self):
         for node in self.ast:
-            self.eval_node(node)
+            if isinstance(node, list):
+                for subnode in node:
+                    self.eval_node(subnode)
+            else:
+                self.eval_node(node)
 
     def eval_node(self, node):
         if isinstance(node, PutsStatement):
@@ -25,6 +29,14 @@ class Interpreter:
         elif isinstance(node, VariableAssignment):
             value = self.eval_node(node.value)
             self.env.variables[node.name] = value
+        elif isinstance(node, IfElseStatement):
+            condition = self.eval_node(node.condition)
+            if condition:
+                for stmt in node.then_block:
+                    self.eval_node(stmt)
+            else:
+                for stmt in node.else_block:
+                    self.eval_node(stmt)
         elif isinstance(node, BinaryOp):
             left = self.eval_node(node.left)
             right = self.eval_node(node.right)
@@ -38,6 +50,8 @@ class Interpreter:
                 if right == 0:
                     raise RuntimeError("Division by zero")
                 return left / right
+            elif node.op == '==':
+                return left == right
             else:
                 raise RuntimeError(f"Unsupported operator: {node.op}")
         elif isinstance(node, FunctionCall):
@@ -79,11 +93,15 @@ class Interpreter:
                 if right == 0:
                     raise RuntimeError("Division by zero")
                 return left / right
+            elif node.op == '==':
+                return left == right
             else:
                 raise RuntimeError(f"Unsupported operator: {node.op}")
         elif isinstance(node, Identifier):
             if node.name in local_env:
                 return local_env[node.name]
+            elif node.name in self.env.variables:
+                return self.env.variables[node.name]
             else:
                 raise RuntimeError(f"Unknown identifier: {node.name}")
         elif isinstance(node, int):
