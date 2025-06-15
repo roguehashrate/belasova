@@ -1,3 +1,4 @@
+-- Function definitions
 fn add :: Int -> Int ->> Int
 add x y = x + y
 
@@ -10,8 +11,16 @@ multi x y = x * y
 fn div :: Int -> Int ->> Int
 div x y = x / y
 
--- I'm a comment in Belasova
+-- Variable assignments
+let a = 10
+let b :: Int = 20
+let c = a + b
+
+-- Output test
 puts "Hello, Belasova!"
+puts c
+
+-- Function calls
 puts add 10 5
 puts sub 10 5
 puts multi 10 5

@@ -22,6 +22,8 @@ class Parser:
         while self.current()[0] != 'EOF':
             if self.current()[0] == 'FN':
                 ast.append(self.parse_function_signature())
+            elif self.current()[0] == 'LET':
+                ast.append(self.parse_variable_assignment())
             elif self.current()[0] == 'PUTS':
                 ast.append(self.parse_puts())
             elif self.current()[0] == 'IDENT':
@@ -61,25 +63,34 @@ class Parser:
         body = self.parse_expression()
         return FunctionDefinition(name, params, body)
 
+    def parse_variable_assignment(self):
+        self.eat('LET')
+        name = self.eat('IDENT')[1]
+        type_annotation = None
+        if self.current()[0] == 'COLON2':
+            self.eat('COLON2')
+            type_annotation = self.eat('INT_TYPE')[1]
+        self.eat('EQUAL')
+        value = self.parse_expression()
+        return VariableAssignment(name, type_annotation, value)
+
     def parse_puts(self):
         self.eat('PUTS')
         expr = self.parse_expression()
         return PutsStatement(expr)
 
     def parse_expression(self):
-        # Handle addition and subtraction (lowest precedence)
         left = self.parse_term()
         while self.current()[0] in ('PLUS', 'MINUS'):
-            op = self.eat(self.current()[0])[1]  # '+' or '-'
+            op = self.eat(self.current()[0])[1]
             right = self.parse_term()
             left = BinaryOp(left, op, right)
         return left
 
     def parse_term(self):
-        # Handle multiplication and division (higher precedence)
         left = self.parse_factor()
         while self.current()[0] in ('MULTIPLY', 'DIVIDE'):
-            op = self.eat(self.current()[0])[1]  # '*' or '/'
+            op = self.eat(self.current()[0])[1]
             right = self.parse_factor()
             left = BinaryOp(left, op, right)
         return left

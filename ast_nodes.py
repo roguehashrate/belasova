@@ -5,7 +5,7 @@ class FunctionSignature:
         self.return_type = return_type
 
     def __repr__(self):
-        return f'FunctionSignature({self.name}, {self.param_types} ->> {self.return_type})'
+        return f"FunctionSignature({self.name}, {self.param_types} ->> {self.return_type})"
 
 class FunctionDefinition:
     def __init__(self, name, params, body):
@@ -14,14 +14,14 @@ class FunctionDefinition:
         self.body = body
 
     def __repr__(self):
-        return f'FunctionDefinition({self.name} {self.params} = {self.body})'
+        return f"FunctionDefinition({self.name} {self.params} = {self.body})"
 
 class PutsStatement:
     def __init__(self, expr):
         self.expr = expr
 
     def __repr__(self):
-        return f'Puts({self.expr})'
+        return f"Puts({self.expr})"
 
 class BinaryOp:
     def __init__(self, left, op, right):
@@ -30,14 +30,7 @@ class BinaryOp:
         self.right = right
 
     def __repr__(self):
-        return f'BinaryOp({self.left} {self.op} {self.right})'
-
-class Identifier:
-    def __init__(self, name):
-        self.name = name
-
-    def __repr__(self):
-        return f'Identifier({self.name})'
+        return f"BinaryOp({self.left} {self.op} {self.right})"
 
 class FunctionCall:
     def __init__(self, name, args):
@@ -45,4 +38,20 @@ class FunctionCall:
         self.args = args
 
     def __repr__(self):
-        return f'FunctionCall({self.name} {self.args})'
+        return f"FunctionCall({self.name} {self.args})"
+
+class Identifier:
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f"Identifier({self.name})"
+
+class VariableAssignment:
+    def __init__(self, name, type_annotation, value):
+        self.name = name
+        self.type_annotation = type_annotation
+        self.value = value
+
+    def __repr__(self):
+        return f"VariableAssignment({self.name}, {self.type_annotation}, {self.value})"

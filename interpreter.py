@@ -3,6 +3,7 @@ from ast_nodes import *
 class Environment:
     def __init__(self):
         self.functions = {}
+        self.variables = {}
 
 class Interpreter:
     def __init__(self, ast):
@@ -21,6 +22,9 @@ class Interpreter:
             pass
         elif isinstance(node, FunctionDefinition):
             self.env.functions[node.name] = node
+        elif isinstance(node, VariableAssignment):
+            value = self.eval_node(node.value)
+            self.env.variables[node.name] = value
         elif isinstance(node, BinaryOp):
             left = self.eval_node(node.left)
             right = self.eval_node(node.right)
@@ -40,7 +44,10 @@ class Interpreter:
             arg_values = [self.eval_node(arg) for arg in node.args]
             return self.call_function(node.name, arg_values)
         elif isinstance(node, Identifier):
-            raise RuntimeError(f"Unknown identifier: {node.name}")
+            if node.name in self.env.variables:
+                return self.env.variables[node.name]
+            else:
+                raise RuntimeError(f"Unknown identifier: {node.name}")
         elif isinstance(node, int):
             return node
         elif isinstance(node, str):

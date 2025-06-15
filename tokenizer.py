@@ -1,16 +1,16 @@
 import re
 
 token_specification = [
-    ('COMMENT', r'--.*'),        # Comments: from -- to end of line
     ('FN', r'fn'),
+    ('LET', r'let'),
     ('COLON2', r'::'),
     ('ARROW2', r'->>'),
     ('ARROW', r'->'),
     ('EQUAL', r'='),
     ('PLUS', r'\+'),
-    ('MINUS', r'\-'),
+    ('MINUS', r'-'),
     ('MULTIPLY', r'\*'),
-    ('DIVIDE', r'\/'),
+    ('DIVIDE', r'/'),
     ('PUTS', r'puts'),
     ('INT_TYPE', r'Int'),
     ('NUMBER', r'\d+'),
@@ -25,6 +25,14 @@ tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
 get_token = re.compile(tok_regex).match
 
 def tokenize(code):
+    # Handle comments: remove everything after '--'
+    lines = []
+    for line in code.splitlines():
+        if '--' in line:
+            line = line.split('--')[0]
+        lines.append(line)
+    code = '\n'.join(lines)
+
     pos = 0
     tokens = []
     while pos < len(code):
@@ -32,8 +40,7 @@ def tokenize(code):
         if m:
             kind = m.lastgroup
             value = m.group(kind)
-            if kind in ('NEWLINE', 'SKIP', 'COMMENT'):
-                # Skip whitespace, newlines, and comments entirely
+            if kind == 'NEWLINE' or kind == 'SKIP':
                 pass
             elif kind == 'MISMATCH':
                 raise RuntimeError(f'Unexpected character: {value}')
