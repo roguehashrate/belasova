@@ -1,0 +1,23 @@
+### Variable declarations and arithmetic ###
+x = 10
+y = 20
+puts x + y  # Should print 30
+
+### String concatenation ###
+name = "Belasova"
+puts "Hello, " ++ name  # Should print "Hello, Belasova"
+
+### More complex arithmetic ###
+z = (x + y) * 2
+puts z  # Should print 60
+
+### Division ###
+puts z / 3  # Should print 20.0
+
+### Function definition ###
+fn greet :: String ->> IO ()
+fn greet name = 
+    puts "Hello, " ++ name
+    puts name == "Admin"
+
+greet "Alice"  # Should print "Hello, Alice" and "False"
