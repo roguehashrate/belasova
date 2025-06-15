@@ -1,0 +1,17 @@
+fn add :: Int -> Int ->> Int
+add x y = x + y
+
+fn sub :: Int -> Int ->> Int
+sub x y = x - y
+
+fn multi :: Int -> Int ->> Int
+multi x y = x * y
+
+fn div :: Int -> Int ->> Int
+div x y = x / y
+
+puts "Hello, Belasova!"
+puts add 10 5
+puts sub 10 5
+puts multi 10 5
+puts div 10 5
