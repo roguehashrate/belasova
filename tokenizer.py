@@ -1,6 +1,7 @@
 import re
 
 token_specification = [
+    ('COMMENT', r'--.*'),        # Comments: from -- to end of line
     ('FN', r'fn'),
     ('COLON2', r'::'),
     ('ARROW2', r'->>'),
@@ -17,7 +18,7 @@ token_specification = [
     ('STRING', r'"[^"]*"'),
     ('NEWLINE', r'\n'),
     ('SKIP', r'[ \t]+'),
-    ('MISMATCH', r'.')
+    ('MISMATCH', r'.'),
 ]
 
 tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
@@ -31,7 +32,8 @@ def tokenize(code):
         if m:
             kind = m.lastgroup
             value = m.group(kind)
-            if kind == 'NEWLINE' or kind == 'SKIP':
+            if kind in ('NEWLINE', 'SKIP', 'COMMENT'):
+                # Skip whitespace, newlines, and comments entirely
                 pass
             elif kind == 'MISMATCH':
                 raise RuntimeError(f'Unexpected character: {value}')

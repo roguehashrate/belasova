@@ -10,6 +10,7 @@ multi x y = x * y
 fn div :: Int -> Int ->> Int
 div x y = x / y
 
+-- I'm a comment in Belasova
 puts "Hello, Belasova!"
 puts add 10 5
 puts sub 10 5
