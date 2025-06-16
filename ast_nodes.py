@@ -75,3 +75,10 @@ class IfChain:
     def __init__(self, branches, else_block):
         self.branches = branches
         self.else_block = else_block
+
+class InputCall:
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return "InputCall()"

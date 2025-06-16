@@ -46,11 +46,10 @@ class Parser:
                 break
             else:
                 raise RuntimeError(f"Expected arrow, got {self.current()}")
-        return_type = self.eat(self.current()[0])[1]  # Support both Int and String
+        return_type = self.eat(self.current()[0])[1]  
         signature = FunctionSignature(name, param_types, return_type)
         
-        # Parse function definition, excluding the function name from params
-        self.eat('IDENT')  # Skip the function name (e.g., 'add')
+        self.eat('IDENT')  
         params = []
         while self.current()[0] == 'IDENT':
             params.append(self.eat('IDENT')[1])
@@ -69,8 +68,20 @@ class Parser:
                 type_annotation = self.eat(self.current()[0])[1]
             else:
                 raise RuntimeError(f"Expected type, got {self.current()}")
-        self.eat('EQUAL')
-        value = self.parse_expression()
+
+        if self.current()[0] == 'EQUAL':
+            self.eat('EQUAL')
+            value = self.parse_expression()
+        elif self.current()[0] == 'ASSIGN_INPUT':
+            self.eat('ASSIGN_INPUT')
+            if self.current()[0] == 'IDENT' and self.current()[1] == 'getLine':
+                self.eat('IDENT')
+                value = InputCall()
+            else:
+                raise RuntimeError(f"Expected 'getLine' after '<-', got {self.current()}")
+        else:
+            raise RuntimeError(f"Expected '=' or '<-' after let statement, got {self.current()}")
+
         return VariableAssignment(name, type_annotation, value)
 
     def parse_puts(self):
@@ -112,7 +123,6 @@ class Parser:
             raise RuntimeError(f"Expected 'END' token to close if-chain block but got {self.current()}")
 
         return IfChain(branches, else_block)
-
 
     def parse_expression(self):
         left = self.parse_term()

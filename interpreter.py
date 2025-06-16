@@ -49,7 +49,7 @@ class Interpreter:
                     return
             for stmt in node.else_block:
                 self.eval_node(stmt)
-                
+
         elif isinstance(node, BinaryOp):
             left = self.eval_node(node.left)
             right = self.eval_node(node.right)
@@ -75,6 +75,8 @@ class Interpreter:
                 return self.env.variables[node.name]
             else:
                 raise RuntimeError(f"Unknown identifier: {node.name}")
+        elif isinstance(node, InputCall):
+            return input()
         elif isinstance(node, int):
             return node
         elif isinstance(node, float):
@@ -114,6 +116,8 @@ class Interpreter:
                 return left == right
             else:
                 raise RuntimeError(f"Unsupported operator: {node.op}")
+        elif isinstance(node, InputCall):
+            return input()
         elif isinstance(node, Identifier):
             if node.name in local_env:
                 return local_env[node.name]
