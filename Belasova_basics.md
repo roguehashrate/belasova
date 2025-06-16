@@ -8,7 +8,7 @@ Belasova is a simple, statically typed language designed for ease of use with a 
 * Basic arithmetic and string operations
 * Function declarations and calls
 * Input and output with `getLine` and `puts`
-* Basic control flow (More to come, currently only if-else)
+* Basic control flow (More to come!)
 
 ---
 
