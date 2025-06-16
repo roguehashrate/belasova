@@ -146,7 +146,9 @@ let bmi :: Double = weight / (height * height)
 puts "Hello, " ++ name ++ "!"
 puts "Your BMI is " ++ bmi ++ "."
 ```
+
 ### Sample Program: Basic Calculator
+
 ```belasova
 -- Functions used for calculation
 fn add x y :: Int -> Int ->> Int
