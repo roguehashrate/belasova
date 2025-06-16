@@ -3,17 +3,14 @@ puts "Welcome to Belasova BMI Calculator!"
 puts "What is your name?"
 let name :: String <- getLine
 
-puts "Enter your height (feet):"
-let feet :: Double <- getLine
-
-puts "Enter your height (inches):"
-let inches :: Double <- getLine
-
-puts "Enter your weight (pounds):"
+puts "Enter your weight in kilograms:"
 let weight :: Double <- getLine
 
-let heightInches :: Double = (feet * 12) + inches
-let bmi :: Double = (weight * 703) / (heightInches * heightInches)
+puts "Enter your height in meters:"
+let height :: Double <- getLine
+
+let bmi :: Double = weight / (height * height)
+
 
 puts "Hello, " ++ name ++ "!"
 puts "Your BMI is " ++ bmi ++ "."
