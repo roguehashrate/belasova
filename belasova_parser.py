@@ -126,11 +126,13 @@ class Parser:
 
     def parse_expression(self):
         left = self.parse_term()
-        while self.current()[0] in ('PLUS', 'MINUS', 'EQEQ'):
-            op = self.eat(self.current()[0])[1]
+        while self.current()[0] in ('PLUS', 'MINUS', 'EQEQ', 'CONCAT'):
+            op_token = self.eat(self.current()[0])
+            op = op_token[1]  # This will be '+' or '++' etc.
             right = self.parse_term()
             left = BinaryOp(left, op, right)
         return left
+
 
     def parse_term(self):
         left = self.parse_factor()

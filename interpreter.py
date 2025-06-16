@@ -39,7 +39,6 @@ class Interpreter:
             else:
                 for stmt in node.else_block:
                     self.eval_node(stmt)
-
         elif isinstance(node, IfChain):
             for condition, then_block in node.branches:
                 cond_value = self.eval_node(condition)
@@ -49,7 +48,6 @@ class Interpreter:
                     return
             for stmt in node.else_block:
                 self.eval_node(stmt)
-
         elif isinstance(node, BinaryOp):
             left = self.eval_node(node.left)
             right = self.eval_node(node.right)
@@ -65,6 +63,8 @@ class Interpreter:
                 return left / right
             elif node.op == '==':
                 return left == right
+            elif node.op == '++':
+                return str(left) + str(right)
             else:
                 raise RuntimeError(f"Unsupported operator: {node.op}")
         elif isinstance(node, FunctionCall):
@@ -114,6 +114,8 @@ class Interpreter:
                 return left / right
             elif node.op == '==':
                 return left == right
+            elif node.op == '++':
+                return str(left) + str(right)
             else:
                 raise RuntimeError(f"Unsupported operator: {node.op}")
         elif isinstance(node, InputCall):

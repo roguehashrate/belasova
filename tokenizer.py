@@ -12,6 +12,7 @@ token_specification = [
     ('ARROW', r'->'),
     ('EQEQ', r'=='),  # Added before EQUAL to ensure == is tokenized correctly
     ('ASSIGN_INPUT', r'<-'), # For Inputs
+    ('CONCAT', r'\+\+'),
     ('EQUAL', r'='),
     ('PLUS', r'\+'),
     ('MINUS', r'-'),

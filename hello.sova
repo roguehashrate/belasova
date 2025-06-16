@@ -1,2 +1,2 @@
 let name :: String <- getLine
-puts name
+puts "Hello, " ++ name
