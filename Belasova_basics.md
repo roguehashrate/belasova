@@ -115,13 +115,14 @@ let inches :: Int <- getLine
 
 let heightInches :: Int = (feet * 12) + inches
 
-fn calculateBMI weight height -> Double -> Int ->> Double
-calculateBMI weight height = (weight * 703) / (height * height)
+fn calculateBMI weight heightInches :: Double -> Int ->> Double
+calculateBMI weight heightInches = (weight * 703) / (heightInches * heightInches)
 
 let bmi :: Double = calculateBMI weight heightInches
 
 puts "Hello, " ++ name ++ "!"
 puts "Your BMI is " ++ bmi ++ "."
+
 ```
 
 ---
