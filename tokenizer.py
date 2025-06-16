@@ -28,6 +28,8 @@ token_specification = [
     ('STRING', r'"[^"]*"'),
     ('NEWLINE', r'\n'),
     ('SKIP', r'[ \t]+'),
+    ('LPAREN', r'\('),
+    ('RPAREN', r'\)'),
     ('MISMATCH', r'.'),
 ]
 

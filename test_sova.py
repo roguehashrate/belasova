@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 from tokenizer import tokenize
 from belasova_parser import Parser
@@ -16,16 +14,16 @@ def main():
         code = f.read()
 
     tokens = tokenize(code)
-    # print("Tokens:")
-    # for t in tokens:
-    #     print(t)
+    print("Tokens:")
+    for t in tokens:
+        print(t)
 
     parser = Parser(tokens)
     ast = parser.parse()
 
-    # print("\nAST:")
-    # for node in ast:
-    #     print(node)
+    print("\nAST:")
+    for node in ast:
+        print(node)
 
     interpreter = Interpreter(ast)
     interpreter.interpret()

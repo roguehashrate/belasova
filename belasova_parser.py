@@ -160,13 +160,22 @@ class Parser:
                 return FunctionCall(name, args)
             else:
                 return Identifier(name)
+
         elif tok[0] == 'NUMBER':
             value_str = self.eat('NUMBER')[1]
             if '.' in value_str:
                 return float(value_str)
             else:
                 return int(value_str)
+
         elif tok[0] == 'STRING':
             return self.eat('STRING')[1]
+
+        elif tok[0] == 'LPAREN':
+            self.eat('LPAREN')
+            expr = self.parse_expression()
+            self.eat('RPAREN')
+            return expr
+
         else:
             raise RuntimeError(f"Unexpected token in factor: {tok}")

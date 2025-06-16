@@ -92,6 +92,25 @@ class Interpreter:
             raise RuntimeError(f"Unknown AST node: {node}")
 
     def call_function(self, name, args):
+        # Built-in toInt
+        if name == 'toInt':
+            if len(args) != 1:
+                raise RuntimeError("toInt expects exactly 1 argument")
+            try:
+                return int(args[0])
+            except Exception as e:
+                raise RuntimeError(f"toInt conversion error: {e}")
+
+        # Built-in toDouble
+        if name == 'toDouble':
+            if len(args) != 1:
+                raise RuntimeError("toDouble expects exactly 1 argument")
+            try:
+                return float(args[0])
+            except Exception as e:
+                raise RuntimeError(f"toDouble conversion error: {e}")
+
+        # User-defined functions
         if name not in self.env.functions:
             raise RuntimeError(f"Function not found: {name}")
         func = self.env.functions[name]
