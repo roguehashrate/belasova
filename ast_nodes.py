@@ -64,3 +64,14 @@ class VariableAssignment:
 
     def __repr__(self):
         return f"VariableAssignment({self.name}, {self.type_annotation}, {self.value})"
+
+class NumberLiteral:
+    def __init__(self, value):
+        self.value = value
+    def __repr__(self):
+        return f"NumberLiteral({self.value})"
+
+class IfChain:
+    def __init__(self, branches, else_block):
+        self.branches = branches
+        self.else_block = else_block

@@ -27,7 +27,7 @@ class Parser:
             elif self.current()[0] == 'PUTS':
                 ast.append(self.parse_puts())
             elif self.current()[0] == 'IF':
-                ast.append(self.parse_if_else())
+                ast.append(self.parse_if_chain())
             else:
                 raise RuntimeError(f"Unexpected token: {self.current()}")
         return ast
@@ -65,7 +65,7 @@ class Parser:
         type_annotation = None
         if self.current()[0] == 'COLON2':
             self.eat('COLON2')
-            if self.current()[0] in ('INT_TYPE', 'STRING_TYPE'):
+            if self.current()[0] in ('INT_TYPE', 'STRING_TYPE', 'DOUBLE_TYPE'):
                 type_annotation = self.eat(self.current()[0])[1]
             else:
                 raise RuntimeError(f"Expected type, got {self.current()}")
@@ -78,25 +78,41 @@ class Parser:
         expr = self.parse_expression()
         return PutsStatement(expr)
 
-    def parse_if_else(self):
-        self.eat('IF')
-        condition = self.parse_expression()
-        self.eat('THEN')
-        self.eat('COLON')
-        then_block = []
-        while self.current()[0] not in ('ELSE', 'EOF'):
-            if self.current()[0] == 'PUTS':
-                then_block.append(self.parse_puts())
-            else:
-                raise RuntimeError(f"Unexpected token in then block: {self.current()}")
+    def parse_if_chain(self):
+        branches = []
+
+        while self.current()[0] == 'IF':
+            self.eat('IF')
+            condition = self.parse_expression()
+            self.eat('THEN')
+            self.eat('COLON')
+
+            then_block = []
+            while self.current()[0] not in ('IF', 'ELSE', 'END', 'EOF'):
+                if self.current()[0] == 'PUTS':
+                    then_block.append(self.parse_puts())
+                else:
+                    raise RuntimeError(f"Unexpected token in then block: {self.current()}")
+
+            branches.append((condition, then_block))
+
         else_block = []
         if self.current()[0] == 'ELSE':
             self.eat('ELSE')
-            if self.current()[0] == 'PUTS':  # Only parse one PUTS statement for else block
-                else_block.append(self.parse_puts())
-            else:
-                raise RuntimeError(f"Expected PUTS in else block, got {self.current()}")
-        return IfElseStatement(condition, then_block, else_block)
+            self.eat('COLON')
+            while self.current()[0] not in ('END', 'EOF'):
+                if self.current()[0] == 'PUTS':
+                    else_block.append(self.parse_puts())
+                else:
+                    raise RuntimeError(f"Unexpected token in else block: {self.current()}")
+
+        if self.current()[0] == 'END':
+            self.eat('END')
+        else:
+            raise RuntimeError(f"Expected 'END' token to close if-chain block but got {self.current()}")
+
+        return IfChain(branches, else_block)
+
 
     def parse_expression(self):
         left = self.parse_term()
@@ -123,13 +139,21 @@ class Parser:
                 if self.current()[0] == 'IDENT':
                     args.append(Identifier(self.eat('IDENT')[1]))
                 elif self.current()[0] == 'NUMBER':
-                    args.append(int(self.eat('NUMBER')[1]))
+                    value_str = self.eat('NUMBER')[1]
+                    if '.' in value_str:
+                        args.append(float(value_str))
+                    else:
+                        args.append(int(value_str))
             if args:
                 return FunctionCall(name, args)
             else:
                 return Identifier(name)
         elif tok[0] == 'NUMBER':
-            return int(self.eat('NUMBER')[1])
+            value_str = self.eat('NUMBER')[1]
+            if '.' in value_str:
+                return float(value_str)
+            else:
+                return int(value_str)
         elif tok[0] == 'STRING':
             return self.eat('STRING')[1]
         else:

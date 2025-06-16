@@ -19,7 +19,9 @@ class Interpreter:
                 self.eval_node(node)
 
     def eval_node(self, node):
-        if isinstance(node, PutsStatement):
+        if isinstance(node, NumberLiteral):
+            return node.value
+        elif isinstance(node, PutsStatement):
             result = self.eval_node(node.expr)
             print(result)
         elif isinstance(node, FunctionSignature):
@@ -37,6 +39,17 @@ class Interpreter:
             else:
                 for stmt in node.else_block:
                     self.eval_node(stmt)
+
+        elif isinstance(node, IfChain):
+            for condition, then_block in node.branches:
+                cond_value = self.eval_node(condition)
+                if cond_value:
+                    for stmt in then_block:
+                        self.eval_node(stmt)
+                    return
+            for stmt in node.else_block:
+                self.eval_node(stmt)
+                
         elif isinstance(node, BinaryOp):
             left = self.eval_node(node.left)
             right = self.eval_node(node.right)
@@ -64,6 +77,8 @@ class Interpreter:
                 raise RuntimeError(f"Unknown identifier: {node.name}")
         elif isinstance(node, int):
             return node
+        elif isinstance(node, float):
+            return node
         elif isinstance(node, str):
             return node.strip('"')
         else:
@@ -80,7 +95,9 @@ class Interpreter:
         return self.eval_function_body(func.body, local_env)
 
     def eval_function_body(self, node, local_env):
-        if isinstance(node, BinaryOp):
+        if isinstance(node, NumberLiteral):
+            return node.value
+        elif isinstance(node, BinaryOp):
             left = self.eval_function_body(node.left, local_env)
             right = self.eval_function_body(node.right, local_env)
             if node.op == '+':

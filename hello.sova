@@ -1,41 +1,9 @@
--- Function definitions
-fn add :: Int -> Int ->> Int
-add x y = x + y
+let x = 1
 
-fn sub :: Int -> Int ->> Int
-sub x y = x - y
-
-fn multi :: Int -> Int ->> Int
-multi x y = x * y
-
-fn div :: Int -> Int ->> Int
-div x y = x / y
-
--- Variable assignments
-let a = 10
-let b :: Int = 20
-let c = a + b
-
--- If else
-let test :: String = "test"
-
-if test == "test" then:
-    puts "This works"
-else
-    puts "This isn't working"
-
--- Output test
-puts "Hello, Belasova!"
-puts c
-
--- Function calls
-puts add 10 5
-puts sub 10 5
-puts multi 10 5
-puts div 10 5
--- Testing Adding variables into a variable with an output
-let a :: Int = 100
-let b :: Int = 300
-
-let xyz = a + b
-puts xyz
+if x == 0 then:
+    puts "x is zero"
+if x == 1 then:
+    puts "x is one"
+else:
+    puts "x is something else"
+end

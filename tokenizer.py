@@ -6,6 +6,7 @@ token_specification = [
     ('IF', r'if'),
     ('THEN', r'then'),
     ('ELSE', r'else'),
+    ('END', r'end'),
     ('COLON2', r'::'),
     ('ARROW2', r'->>'),
     ('ARROW', r'->'),
@@ -19,7 +20,8 @@ token_specification = [
     ('PUTS', r'puts'),
     ('INT_TYPE', r'Int'),
     ('STRING_TYPE', r'String'),  # Added to support String type
-    ('NUMBER', r'\d+'),
+    ('DOUBLE_TYPE', r'Double'),
+    ('NUMBER', r'\d+(\.\d+)?'),
     ('IDENT', r'[a-zA-Z_][a-zA-Z0-9_]*'),
     ('STRING', r'"[^"]*"'),
     ('NEWLINE', r'\n'),
