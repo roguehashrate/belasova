@@ -30,6 +30,11 @@ class Interpreter:
             self.env.functions[node.name] = node
         elif isinstance(node, VariableAssignment):
             value = self.eval_node(node.value)
+            # Convert based on type annotation
+            if node.type_annotation == 'Int':
+                value = int(value)
+            elif node.type_annotation == 'Double':
+                value = float(value)
             self.env.variables[node.name] = value
         elif isinstance(node, IfElseStatement):
             condition = self.eval_node(node.condition)
@@ -99,6 +104,14 @@ class Interpreter:
     def eval_function_body(self, node, local_env):
         if isinstance(node, NumberLiteral):
             return node.value
+        elif isinstance(node, VariableAssignment):
+            value = self.eval_function_body(node.value, local_env)
+            if node.type_annotation == 'Int':
+                value = int(value)
+            elif node.type_annotation == 'Double':
+                value = float(value)
+            local_env[node.name] = value
+            return value
         elif isinstance(node, BinaryOp):
             left = self.eval_function_body(node.left, local_env)
             right = self.eval_function_body(node.right, local_env)
