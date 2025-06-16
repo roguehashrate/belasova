@@ -35,9 +35,18 @@ class Parser:
     def parse_function(self):
         self.eat('FN')
         name = self.eat('IDENT')[1]
+
+        # Parse parameter names BEFORE the '::' type signature
+        params = []
+        while self.current()[0] == 'IDENT':
+            params.append(self.eat('IDENT')[1])
+
+        # Now expect the '::' token to start the type signature
         self.eat('COLON2')
+
+        # Parse parameter types and return type signature
         param_types = []
-        while self.current()[0] in ('INT_TYPE', 'STRING_TYPE'):
+        while self.current()[0] in ('INT_TYPE', 'STRING_TYPE', 'DOUBLE_TYPE'):
             param_types.append(self.eat(self.current()[0])[1])
             if self.current()[0] == 'ARROW':
                 self.eat('ARROW')
@@ -46,16 +55,23 @@ class Parser:
                 break
             else:
                 raise RuntimeError(f"Expected arrow, got {self.current()}")
-        return_type = self.eat(self.current()[0])[1]  
+
+        return_type = self.eat(self.current()[0])[1]
+
         signature = FunctionSignature(name, param_types, return_type)
-        
-        self.eat('IDENT')  
-        params = []
+
+        # After the signature, parse the function body (definition)
+        self.eat('IDENT')  # Eat function name again in definition line
+
+        # Parse function parameters again in definition line
+        def_params = []
         while self.current()[0] == 'IDENT':
-            params.append(self.eat('IDENT')[1])
+            def_params.append(self.eat('IDENT')[1])
+
         self.eat('EQUAL')
         body = self.parse_expression()
-        definition = FunctionDefinition(name, params, body)
+        definition = FunctionDefinition(name, def_params, body)
+
         return [signature, definition]
 
     def parse_variable_assignment(self):
