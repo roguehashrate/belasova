@@ -50,12 +50,12 @@ puts "Hello, " ++ name ++ "!"
 Functions are declared with `fn` and a detailed type signature. Function bodies **must** be ended with `end` (we like consistency!).
 
 ```belasova
-fn add x y -> Int -> Int ->> Int
+fn add x y :: Int -> Int ->> Int
 add x y = x + y
 end
 ```
 
-- The signature syntax: `fn <name> <param1> <param2> ... -> <Type1> -> <Type2> ->> <ReturnType>`  
+- The signature syntax: `fn <name> <param1> <param2> :: -> <Type1> -> <Type2> ->> <ReturnType>`  
 - The function body repeats the name and parameters, then an `=` followed by the expression  
 - Functions are called like: `let result :: Int = add 5 10`
 
@@ -118,25 +118,25 @@ puts "Welcome to Belasova BMI Calculator!"
 puts "What is your name?"
 let name :: String <- getLine
 
-puts "Enter your weight in pounds:"
+puts "Enter your weight in pounds (LBs)"
 let weight :: Double <- getLine
 
-puts "Enter your height (feet):"
+puts "Enter your height (ft)"
 let feet :: Int <- getLine
 
-puts "Enter your height (inches):"
+puts "Enter extra inches (Ex. 6ft 2in, 5ft 3in)"
 let inches :: Int <- getLine
 
 let heightInches :: Int = (feet * 12) + inches
 
-fn calculateBMI weight heightInches -> Double -> Int ->> Double
+fn calculateBMI weight heightInches :: Double -> Int ->> Double
 calculateBMI weight heightInches = (weight * 703) / (heightInches * heightInches)
 end
 
 let bmi :: Double = calculateBMI weight heightInches
 
 puts "Hello, " ++ name ++ "!"
-puts "Your BMI is " ++ bmi ++ "."
+puts "Your BMI is: " ++ bmi ++ "."
 ```
 
 ---
@@ -166,19 +166,19 @@ puts "Your BMI is " ++ bmi ++ "."
 ## Sample Program: Basic Calculator
 
 ```belasova
-fn add x y -> Int -> Int ->> Int
+fn add x y :: Int -> Int ->> Int
 add x y = x + y
 end
 
-fn sub x y -> Int -> Int ->> Int
+fn sub x y :: Int -> Int ->> Int
 sub x y = x - y
 end
 
-fn multiply x y -> Int -> Int ->> Int
+fn multiply x y :: Int -> Int ->> Int
 multiply x y = x * y
 end
 
-fn divide x y -> Int -> Int ->> Int
+fn divide x y :: Int -> Int ->> Int
 divide x y = x / y
 end
 

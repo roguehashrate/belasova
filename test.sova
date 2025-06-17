@@ -1,0 +1,36 @@
+fn add x y :: Int -> Int ->> Int
+add x y = x + y
+end
+
+fn sub x y :: Int -> Int ->> Int
+sub x y = x - y
+end
+
+fn multiply x y :: Int -> Int ->> Int
+multiply x y = x * y
+end
+
+fn divide x y :: Int -> Int ->> Int
+divide x y = x / y
+end
+
+puts "Please enter your first number: "
+let numOne :: Int <- getLine
+
+puts "Please enter your operation (+, -, *, /): "
+let userOp :: String <- getLine
+
+puts "Please enter your second number: "
+let numTwo :: Int <- getLine
+
+if userOp == "+" then:
+    puts add numOne numTwo
+if userOp == "-" then:
+    puts sub numOne numTwo
+if userOp == "*" then:
+    puts multiply numOne numTwo
+if userOp == "/" then:
+    puts divide numOne numTwo
+else:
+    puts "You entered something wrong, be sure to enter (+, -, * or /)"
+end
