@@ -1,27 +1,31 @@
-puts "Welcome to the test!"
+puts "Simple Calculator"
 
-fn add x y :: Int -> Int ->> Int
-add x y = x + y
-end
+puts "Enter the first number:"
+let num1 :: Int <- getLine
 
-let a :: Int = 10
-let b :: Int = 20
-let c :: Int = add a b
+puts "Enter the second number:"
+let num2 :: Int <- getLine
 
-puts "The sum of a and b is:"
-puts c
+puts "Enter an operation (+, -, *, /):"
+let op :: String <- getLine
 
-if c == 30 then:
-    puts "Correct!"
-else:
-    puts "Wrong!"
-end
+let result :: Int = 0
 
-check c:
-    when 10:
-        puts "c is 10"
-    when 30:
-        puts "c is 30"
+if op == "+" then:
+    let result :: Int = num1 + num2
+elif op == "-" then:
+    let result :: Int = num1 - num2
+elif op == "*" then:
+    let result :: Int = num1 * num2
+elif op == "/" then:
+    if num2 == 0 then:
+        puts "Error: Division by zero!"
+        let result :: Int = 0
     else:
-        puts "c is something else"
+        let result :: Int = num1 / num2
+    end
+else:
+    puts "Unknown operation!"
 end
+
+puts "Result: " ++ toString(result)

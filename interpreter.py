@@ -1,3 +1,4 @@
+# interpreter.py
 from ast_nodes import *
 
 class Environment:
@@ -21,22 +22,40 @@ class Interpreter:
     def eval_node(self, node):
         if isinstance(node, NumberLiteral):
             return node.value
-        elif isinstance(node, StringLiteral):       # <--- Added this
+        elif isinstance(node, StringLiteral):
+            return node.value.strip('"')
+        elif isinstance(node, BooleanLiteral):
             return node.value
         elif isinstance(node, PutsStatement):
             result = self.eval_node(node.expr)
             print(result)
+            return None
         elif isinstance(node, FunctionSignature):
-            pass
+            # Signatures are metadata; ignore at runtime
+            return None
         elif isinstance(node, FunctionDefinition):
             self.env.functions[node.name] = node
+            return None
         elif isinstance(node, VariableAssignment):
             value = self.eval_node(node.value)
-            if node.type_annotation == 'Int':
-                value = int(value)
-            elif node.type_annotation == 'Double':
-                value = float(value)
-            self.env.variables[node.name] = value
+            if node.is_declaration:
+                # Cast to type if annotation given
+                if node.type_annotation == 'Int':
+                    value = int(value)
+                elif node.type_annotation == 'Double':
+                    value = float(value)
+                self.env.variables[node.name] = value
+                return value
+            else:
+                if node.name not in self.env.variables:
+                    raise RuntimeError(f"Variable '{node.name}' used before declaration")
+                self.env.variables[node.name] = value
+                return value
+        elif isinstance(node, Identifier):
+            if node.name in self.env.variables:
+                return self.env.variables[node.name]
+            else:
+                raise RuntimeError(f"Variable '{node.name}' used before declaration")
         elif isinstance(node, IfElseStatement):
             condition = self.eval_node(node.condition)
             if condition:
@@ -45,26 +64,48 @@ class Interpreter:
             else:
                 for stmt in node.else_block:
                     self.eval_node(stmt)
+            return None
         elif isinstance(node, IfChain):
             for condition, then_block in node.branches:
-                cond_value = self.eval_node(condition)
-                if cond_value:
+                if self.eval_node(condition):
                     for stmt in then_block:
                         self.eval_node(stmt)
-                    return
+                    return None
             for stmt in node.else_block:
                 self.eval_node(stmt)
+            return None
         elif isinstance(node, CheckStatement):
             subject = self.eval_node(node.subject_expr)
             for pattern_expr, block in node.when_branches:
-                match_value = self.eval_node(pattern_expr)
-                if subject == match_value:
+                if subject == self.eval_node(pattern_expr):
                     for stmt in block:
                         self.eval_node(stmt)
-                    return
+                    return None
             if node.else_block:
                 for stmt in node.else_block:
                     self.eval_node(stmt)
+            return None
+        elif isinstance(node, LoopNode):
+            if node.loop_type == 'infinite':
+                while True:
+                    for stmt in node.body:
+                        self.eval_node(stmt)
+            elif node.loop_type == 'times':
+                count = int(self.eval_node(node.condition_or_count))
+                for _ in range(count):
+                    for stmt in node.body:
+                        self.eval_node(stmt)
+            elif node.loop_type == 'until':
+                while not self.eval_node(node.condition_or_count):
+                    for stmt in node.body:
+                        self.eval_node(stmt)
+            return None
+        elif isinstance(node, UnaryOp):
+            val = self.eval_node(node.expr)
+            if node.op == 'not':
+                return not val
+            else:
+                raise RuntimeError(f"Unsupported unary operator: {node.op}")
         elif isinstance(node, BinaryOp):
             left = self.eval_node(node.left)
             right = self.eval_node(node.right)
@@ -80,18 +121,23 @@ class Interpreter:
                 return left / right
             elif node.op == '==':
                 return left == right
+            elif node.op in ('!=', 'not='):
+                return left != right
+            elif node.op == '<':
+                return left < right
+            elif node.op == '>':
+                return left > right
+            elif node.op == '<=':
+                return left <= right
+            elif node.op == '>=':
+                return left >= right
             elif node.op == '++':
                 return str(left) + str(right)
             else:
                 raise RuntimeError(f"Unsupported operator: {node.op}")
         elif isinstance(node, FunctionCall):
-            arg_values = [self.eval_node(arg) for arg in node.args]
-            return self.call_function(node.name, arg_values)
-        elif isinstance(node, Identifier):
-            if node.name in self.env.variables:
-                return self.env.variables[node.name]
-            else:
-                raise RuntimeError(f"Unknown identifier: {node.name}")
+            args = [self.eval_node(arg) for arg in node.args]
+            return self.call_function(node.name, args)
         elif isinstance(node, InputCall):
             return input()
         elif isinstance(node, int):
@@ -99,7 +145,7 @@ class Interpreter:
         elif isinstance(node, float):
             return node
         elif isinstance(node, str):
-            return node.strip('"')
+            return node
         else:
             raise RuntimeError(f"Unknown AST node: {node}")
 
@@ -129,8 +175,8 @@ class Interpreter:
     def eval_function_body(self, node, local_env):
         if isinstance(node, NumberLiteral):
             return node.value
-        elif isinstance(node, StringLiteral):       # <--- Added this
-            return node.value
+        elif isinstance(node, StringLiteral):
+            return node.value.strip('"')
         elif isinstance(node, VariableAssignment):
             value = self.eval_function_body(node.value, local_env)
             if node.type_annotation == 'Int':
@@ -154,20 +200,35 @@ class Interpreter:
                 return left / right
             elif node.op == '==':
                 return left == right
+            elif node.op in ('!=', 'not='):
+                return left != right
+            elif node.op == '<':
+                return left < right
+            elif node.op == '>':
+                return left > right
+            elif node.op == '<=':
+                return left <= right
+            elif node.op == '>=':
+                return left >= right
             elif node.op == '++':
                 return str(left) + str(right)
             else:
                 raise RuntimeError(f"Unsupported operator: {node.op}")
+        elif isinstance(node, UnaryOp):
+            val = self.eval_function_body(node.expr, local_env)
+            if node.op == 'not':
+                return not val
+            else:
+                raise RuntimeError(f"Unsupported unary operator: {node.op}")
         elif isinstance(node, CheckStatement):
             subject = self.eval_function_body(node.subject_expr, local_env)
             for pattern_expr, block in node.when_branches:
-                match_value = self.eval_function_body(pattern_expr, local_env)
-                if subject == match_value:
+                if subject == self.eval_function_body(pattern_expr, local_env):
                     self.eval_function_body_sequence(block, local_env)
-                    return
+                    return None
             if node.else_block:
                 self.eval_function_body_sequence(node.else_block, local_env)
-                return
+                return None
         elif isinstance(node, InputCall):
             return input()
         elif isinstance(node, Identifier):
@@ -177,16 +238,19 @@ class Interpreter:
                 return self.env.variables[node.name]
             else:
                 raise RuntimeError(f"Unknown identifier: {node.name}")
-        elif isinstance(node, int):
-            return node
-        elif isinstance(node, str):
-            return node.strip('"')
         elif isinstance(node, FunctionCall):
-            arg_values = [self.eval_function_body(arg, local_env) for arg in node.args]
-            return self.call_function(node.name, arg_values)
+            args = [self.eval_function_body(arg, local_env) for arg in node.args]
+            return self.call_function(node.name, args)
         elif isinstance(node, PutsStatement):
             result = self.eval_function_body(node.expr, local_env)
             print(result)
+            return None
+        elif isinstance(node, int):
+            return node
+        elif isinstance(node, float):
+            return node
+        elif isinstance(node, str):
+            return node
         else:
             raise RuntimeError(f"Unsupported node in function body: {node}")
 

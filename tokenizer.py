@@ -4,18 +4,37 @@ token_specification = [
     ('FN', r'fn'),
     ('LET', r'let'),
     ('IF', r'if'),
-    ('THEN', r'then'),
+    ('ELSEIF', r'elseif'),
     ('ELSE', r'else'),
+    ('THEN', r'then'),
     ('END', r'end'),
-    ('CHECK', r'check'),    # Added 'check' keyword
-    ('WHEN', r'when'),      # Added 'when' keyword
+    ('CHECK', r'check'),
+    ('WHEN', r'when'),
+    ('NOT', r'not'),
+    ('AND', r'and'),
+    ('OR', r'or'),
+    ('LOOP', r'loop'),
+    ('TIMES', r'times'),
+    ('UNTIL', r'until'),
+    ('INFINITE', r'infinite'),
+    ('BREAK', r'break'),
+    ('CONTINUE', r'continue'),
+    ('RETURN', r'return'),
+    ('TRUE', r'true'),
+    ('FALSE', r'false'),
     ('COLON2', r'::'),
     ('ARROW2', r'->>'),
     ('ARROW', r'->'),
-    ('EQEQ', r'=='),  # Added before EQUAL to ensure == is tokenized correctly
-    ('ASSIGN_INPUT', r'<-'), # For Inputs
+    ('EQEQ', r'=='),
+    ('NOTEQ', r'!=|<>'),
+    ('LTE', r'<='),
+    ('GTE', r'>='),
+    ('LT', r'<'),
+    ('GT', r'>'),
+    ('ASSIGN_INPUT', r'<-'),
+    ('ASSIGN', r'='),
+    ('COMMENT', r'--.*'),
     ('CONCAT', r'\+\+'),
-    ('EQUAL', r'='),
     ('PLUS', r'\+'),
     ('MINUS', r'-'),
     ('MULTIPLY', r'\*'),
@@ -23,8 +42,9 @@ token_specification = [
     ('COLON', r':'),
     ('PUTS', r'puts'),
     ('INT_TYPE', r'Int'),
-    ('STRING_TYPE', r'String'),  # Added to support String type
+    ('STRING_TYPE', r'String'),
     ('DOUBLE_TYPE', r'Double'),
+    ('BOOL_TYPE', r'Bool'),
     ('NUMBER', r'\d+(\.\d+)?'),
     ('IDENT', r'[a-zA-Z_][a-zA-Z0-9_]*'),
     ('STRING', r'"[^"]*"'),
@@ -35,32 +55,31 @@ token_specification = [
     ('MISMATCH', r'.'),
 ]
 
-tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_specification)
+tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in token_specification)
 get_token = re.compile(tok_regex).match
 
 def tokenize(code):
-    lines = []
-    for line in code.splitlines():
-        if '--' in line:
-            line = line.split('--')[0]
-        lines.append(line)
-    code = '\n'.join(lines)
-
     pos = 0
     tokens = []
+    line_num = 1
+    
     while pos < len(code):
         m = get_token(code, pos)
         if m:
             kind = m.lastgroup
             value = m.group(kind)
-            if kind == 'NEWLINE' or kind == 'SKIP':
-                pass
+            if kind in ('NEWLINE', 'SKIP', 'COMMENT'):
+                if kind == 'NEWLINE':
+                    line_num += 1
+                pos = m.end()
+                continue
             elif kind == 'MISMATCH':
-                raise RuntimeError(f'Unexpected character: {value}')
+                raise RuntimeError(f'Unexpected character: {value} at line {line_num}')
             else:
-                tokens.append((kind, value))
+                tokens.append((kind, value, line_num))
             pos = m.end()
         else:
-            raise RuntimeError(f'Unexpected character at position {pos}')
-    tokens.append(('EOF', ''))
+            raise RuntimeError(f'Unexpected character at position {pos}, line {line_num}')
+    
+    tokens.append(('EOF', '', line_num))
     return tokens
