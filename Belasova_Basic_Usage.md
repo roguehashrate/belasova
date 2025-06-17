@@ -1,3 +1,7 @@
+Got it! Here’s your **Belasova Basic Usage** with my suggested notes added in appropriate places for clarity about current limitations and planned features:
+
+---
+
 # Belasova Language Basic Usage
 
 ## Overview
@@ -6,12 +10,12 @@ Belasova is a simple, statically typed language designed to be friendly and easy
 
 Currently, Belasova supports:
 
-- Variable declarations with explicit types  
-- Basic arithmetic and string operations  
-- Function declarations and calls (with type signatures)  
-- Input and output via `getLine` and `puts`  
-- Control flow via `if`, `else`, and the brand-new `check`-`when` expressions  
-- Blocks that **always** end with `end` — consistency is king here!
+* Variable declarations with explicit types
+* Basic arithmetic and string operations
+* Function declarations and calls (with type signatures)
+* Input and output via `getLine` and `puts`
+* Control flow via `if`, `else`, and the brand-new `check`-`when` expressions
+* Blocks that **always** end with `end` — consistency is king here!
 
 ---
 
@@ -25,15 +29,18 @@ let age :: Int = 30                -- assign directly
 let height :: Double = 1.75
 ```
 
-- Use `<-` when assigning from input or expressions that return values (like `getLine`)  
-- Use `=` when assigning directly from expressions  
+* Use `<-` when assigning from input or expressions that return values (like `getLine`)
+* Use `=` when assigning directly from expressions
+
+**Note on input types:**
+`getLine` always returns a `String`. Conversion to other types (like `Int` or `Double`) must be done explicitly or is assumed by the runtime for now.
 
 ---
 
 ## Input and Output
 
-- Use `getLine` to read a line of user input (always a `String`).  
-- Use `puts` to print text or values to the console.
+* Use `getLine` to read a line of user input (always a `String`).
+* Use `puts` to print text or values to the console.
 
 Example:
 
@@ -55,16 +62,16 @@ add x y = x + y
 end
 ```
 
-- The signature syntax: `fn <name> <param1> <param2> :: -> <Type1> -> <Type2> ->> <ReturnType>`  
-- The function body repeats the name and parameters, then an `=` followed by the expression  
-- Functions are called like: `let result :: Int = add 5 10`
+* The signature syntax: `fn <name> <param1> <param2> :: -> <Type1> -> <Type2> ->> <ReturnType>`
+* The function body repeats the name and parameters, then an `=` followed by the expression
+* Functions are called like: `let result :: Int = add 5 10`
 
 ---
 
 ## Operators
 
-- Arithmetic: `+`, `-`, `*`, `/`  
-- String concatenation: `++`
+* Arithmetic: `+`, `-`, `*`, `/`
+* String concatenation: `++`
 
 Example:
 
@@ -92,6 +99,17 @@ else:
     puts "Number other than 1, 2 or 3"
 end
 ```
+
+**Note on comparisons:**
+Currently, Belasova supports equality comparison `==` for conditionals. Other comparisons such as `<`, `>`, `<=`, `>=` are planned but not implemented yet.
+
+**Note on loops:**
+Looping constructs like `loop`, `loop until`, and `loop x times` are planned but not yet implemented.
+
+**Note on nesting:**
+Nested `if` or control flow blocks may be experimental or limited in support.
+
+---
 
 ### Bonus: `check` with `when`
 
@@ -209,3 +227,5 @@ end
 If you’ve read this far — congrats! 🎉 Belasova is growing bit by bit, so keep an eye out for new features, and happy coding!
 
 ---
+
+Would you like me to save this in a file for you, or do you want to add or tweak anything else?

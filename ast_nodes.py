@@ -68,8 +68,20 @@ class VariableAssignment:
 class NumberLiteral:
     def __init__(self, value):
         self.value = value
+
     def __repr__(self):
         return f"NumberLiteral({self.value})"
+
+class StringLiteral:
+    def __init__(self, value):
+        # Automatically strip surrounding double quotes if present
+        if isinstance(value, str) and value.startswith('"') and value.endswith('"'):
+            self.value = value[1:-1]
+        else:
+            self.value = value
+
+    def __repr__(self):
+        return f"StringLiteral({self.value})"
 
 class IfChain:
     def __init__(self, branches, else_block):
@@ -86,7 +98,6 @@ class InputCall:
     def __repr__(self):
         return "InputCall()"
 
-# New AST node for the check statement
 class CheckStatement:
     def __init__(self, subject_expr, when_branches, else_block):
         self.subject_expr = subject_expr        # Expression to match on

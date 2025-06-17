@@ -21,6 +21,8 @@ class Interpreter:
     def eval_node(self, node):
         if isinstance(node, NumberLiteral):
             return node.value
+        elif isinstance(node, StringLiteral):       # <--- Added this
+            return node.value
         elif isinstance(node, PutsStatement):
             result = self.eval_node(node.expr)
             print(result)
@@ -127,6 +129,8 @@ class Interpreter:
     def eval_function_body(self, node, local_env):
         if isinstance(node, NumberLiteral):
             return node.value
+        elif isinstance(node, StringLiteral):       # <--- Added this
+            return node.value
         elif isinstance(node, VariableAssignment):
             value = self.eval_function_body(node.value, local_env)
             if node.type_annotation == 'Int':
@@ -178,11 +182,9 @@ class Interpreter:
         elif isinstance(node, str):
             return node.strip('"')
         elif isinstance(node, FunctionCall):
-            # Handle recursive and nested function calls inside functions
             arg_values = [self.eval_function_body(arg, local_env) for arg in node.args]
             return self.call_function(node.name, arg_values)
         elif isinstance(node, PutsStatement):
-            # Support printing inside function bodies
             result = self.eval_function_body(node.expr, local_env)
             print(result)
         else:
