@@ -7,6 +7,8 @@ token_specification = [
     ('THEN', r'then'),
     ('ELSE', r'else'),
     ('END', r'end'),
+    ('CHECK', r'check'),    # Added 'check' keyword
+    ('WHEN', r'when'),      # Added 'when' keyword
     ('COLON2', r'::'),
     ('ARROW2', r'->>'),
     ('ARROW', r'->'),

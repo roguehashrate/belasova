@@ -76,9 +76,22 @@ class IfChain:
         self.branches = branches
         self.else_block = else_block
 
+    def __repr__(self):
+        return f"IfChain({self.branches}, else={self.else_block})"
+
 class InputCall:
     def __init__(self):
         pass
 
     def __repr__(self):
         return "InputCall()"
+
+# New AST node for the check statement
+class CheckStatement:
+    def __init__(self, subject_expr, when_branches, else_block):
+        self.subject_expr = subject_expr        # Expression to match on
+        self.when_branches = when_branches      # List of tuples (pattern_expr, [statements])
+        self.else_block = else_block            # List of statements or None
+
+    def __repr__(self):
+        return f"CheckStatement({self.subject_expr}, when_branches={self.when_branches}, else_block={self.else_block})"

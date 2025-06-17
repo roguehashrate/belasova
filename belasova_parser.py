@@ -28,6 +28,8 @@ class Parser:
                 ast.append(self.parse_puts())
             elif self.current()[0] == 'IF':
                 ast.append(self.parse_if_chain())
+            elif self.current()[0] == 'CHECK':
+                ast.append(self.parse_check_statement())
             else:
                 raise RuntimeError(f"Unexpected token: {self.current()}")
         return ast
@@ -36,15 +38,12 @@ class Parser:
         self.eat('FN')
         name = self.eat('IDENT')[1]
 
-        # Parse parameter names BEFORE the '::' type signature
         params = []
         while self.current()[0] == 'IDENT':
             params.append(self.eat('IDENT')[1])
 
-        # Now expect the '::' token to start the type signature
         self.eat('COLON2')
 
-        # Parse parameter types and return type signature
         param_types = []
         while self.current()[0] in ('INT_TYPE', 'STRING_TYPE', 'DOUBLE_TYPE'):
             param_types.append(self.eat(self.current()[0])[1])
@@ -57,22 +56,34 @@ class Parser:
                 raise RuntimeError(f"Expected arrow, got {self.current()}")
 
         return_type = self.eat(self.current()[0])[1]
-
         signature = FunctionSignature(name, param_types, return_type)
 
-        # After the signature, parse the function body (definition)
-        self.eat('IDENT')  # Eat function name again in definition line
-
-        # Parse function parameters again in definition line
+        self.eat('IDENT')
         def_params = []
         while self.current()[0] == 'IDENT':
             def_params.append(self.eat('IDENT')[1])
-
         self.eat('EQUAL')
-        body = self.parse_expression()
-        definition = FunctionDefinition(name, def_params, body)
 
+        body = self.parse_block()
+        definition = FunctionDefinition(name, def_params, body)
         return [signature, definition]
+
+    def parse_block(self):
+        stmts = []
+        while self.current()[0] not in ('END', 'EOF'):
+            tok = self.current()
+            if tok[0] == 'PUTS':
+                stmts.append(self.parse_puts())
+            elif tok[0] == 'LET':
+                stmts.append(self.parse_variable_assignment())
+            elif tok[0] == 'IF':
+                stmts.append(self.parse_if_chain())
+            elif tok[0] == 'CHECK':
+                stmts.append(self.parse_check_statement())
+            else:
+                stmts.append(self.parse_expression())
+        self.eat('END')
+        return stmts
 
     def parse_variable_assignment(self):
         self.eat('LET')
@@ -140,49 +151,69 @@ class Parser:
 
         return IfChain(branches, else_block)
 
-    def parse_expression(self):
-        left = self.parse_term()
-        while self.current()[0] in ('PLUS', 'MINUS', 'EQEQ', 'CONCAT'):
-            op_token = self.eat(self.current()[0])
-            op = op_token[1]  # This will be '+' or '++' etc.
-            right = self.parse_term()
-            left = BinaryOp(left, op, right)
-        return left
+    def parse_check_statement(self):
+        self.eat('CHECK')
+        subject_expr = self.parse_expression()
+        self.eat('COLON')
 
+        when_branches = []
 
-    def parse_term(self):
-        left = self.parse_factor()
-        while self.current()[0] in ('MULTIPLY', 'DIVIDE'):
-            op = self.eat(self.current()[0])[1]
-            right = self.parse_factor()
-            left = BinaryOp(left, op, right)
-        return left
+        while self.current()[0] == 'WHEN':
+            self.eat('WHEN')
+            pattern_expr = self.parse_expression()
+            self.eat('COLON')
 
-    def parse_factor(self):
+            exprs = []
+            while self.current()[0] not in ('WHEN', 'ELSE', 'END', 'EOF'):
+                if self.current()[0] == 'PUTS':
+                    exprs.append(self.parse_puts())
+                elif self.current()[0] == 'LET':
+                    exprs.append(self.parse_variable_assignment())
+                elif self.current()[0] == 'IF':
+                    exprs.append(self.parse_if_chain())
+                elif self.current()[0] == 'CHECK':
+                    exprs.append(self.parse_check_statement())
+                else:
+                    exprs.append(self.parse_expression())
+
+            when_branches.append((pattern_expr, exprs))
+
+        else_block = None
+        if self.current()[0] == 'ELSE':
+            self.eat('ELSE')
+            self.eat('COLON')
+            else_block = []
+            while self.current()[0] not in ('END', 'EOF'):
+                if self.current()[0] == 'PUTS':
+                    else_block.append(self.parse_puts())
+                elif self.current()[0] == 'LET':
+                    else_block.append(self.parse_variable_assignment())
+                elif self.current()[0] == 'IF':
+                    else_block.append(self.parse_if_chain())
+                elif self.current()[0] == 'CHECK':
+                    else_block.append(self.parse_check_statement())
+                else:
+                    else_block.append(self.parse_expression())
+
+        self.eat('END')
+        return CheckStatement(subject_expr, when_branches, else_block)
+
+    def parse_primary(self):
         tok = self.current()
+
+        if tok[0] == 'CHECK':
+            return self.parse_check_statement()
+
         if tok[0] == 'IDENT':
             name = self.eat('IDENT')[1]
-            args = []
-            while self.current()[0] in ('IDENT', 'NUMBER'):
-                if self.current()[0] == 'IDENT':
-                    args.append(Identifier(self.eat('IDENT')[1]))
-                elif self.current()[0] == 'NUMBER':
-                    value_str = self.eat('NUMBER')[1]
-                    if '.' in value_str:
-                        args.append(float(value_str))
-                    else:
-                        args.append(int(value_str))
-            if args:
-                return FunctionCall(name, args)
-            else:
-                return Identifier(name)
+            return Identifier(name)
 
         elif tok[0] == 'NUMBER':
             value_str = self.eat('NUMBER')[1]
             if '.' in value_str:
-                return float(value_str)
+                return NumberLiteral(float(value_str))
             else:
-                return int(value_str)
+                return NumberLiteral(int(value_str))
 
         elif tok[0] == 'STRING':
             return self.eat('STRING')[1]
@@ -194,4 +225,35 @@ class Parser:
             return expr
 
         else:
-            raise RuntimeError(f"Unexpected token in factor: {tok}")
+            raise RuntimeError(f"Unexpected token in primary: {tok}")
+
+    def parse_factor(self):
+        expr = self.parse_primary()
+
+        if isinstance(expr, Identifier):
+            args = []
+            while self.current()[0] in ('IDENT', 'NUMBER', 'LPAREN', 'STRING', 'CHECK'):
+                arg = self.parse_primary()
+                args.append(arg)
+
+            if args:
+                return FunctionCall(expr.name, args)
+
+        return expr
+
+    def parse_term(self):
+        left = self.parse_factor()
+        while self.current()[0] in ('MULTIPLY', 'DIVIDE'):
+            op = self.eat(self.current()[0])[1]
+            right = self.parse_factor()
+            left = BinaryOp(left, op, right)
+        return left
+
+    def parse_expression(self):
+        left = self.parse_term()
+        while self.current()[0] in ('PLUS', 'MINUS', 'EQEQ', 'CONCAT'):
+            op_token = self.eat(self.current()[0])
+            op = op_token[1]
+            right = self.parse_term()
+            left = BinaryOp(left, op, right)
+        return left
