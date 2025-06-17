@@ -1,7 +1,3 @@
-Got it! Here’s your **Belasova Basic Usage** with my suggested notes added in appropriate places for clarity about current limitations and planned features:
-
----
-
 # Belasova Language Basic Usage
 
 ## Overview
