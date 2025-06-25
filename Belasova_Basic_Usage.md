@@ -223,5 +223,3 @@ end
 If you’ve read this far — congrats! 🎉 Belasova is growing bit by bit, so keep an eye out for new features, and happy coding!
 
 ---
-
-Would you like me to save this in a file for you, or do you want to add or tweak anything else?
